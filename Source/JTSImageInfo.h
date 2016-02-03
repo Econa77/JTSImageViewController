@@ -21,6 +21,7 @@
 @property (assign, nonatomic) UIViewContentMode referenceContentMode;
 @property (assign, nonatomic) CGFloat referenceCornerRadius;
 @property (copy, nonatomic) NSMutableDictionary *userInfo;
+@property (assign, nonatomic) BOOL isCachedImage;
 
 - (NSString *)displayableTitleAltTextSummary;
 - (NSString *)combinedTitleAndAltText;

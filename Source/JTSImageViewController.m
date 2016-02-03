@@ -12,6 +12,8 @@
 #import "UIImage+JTSImageEffects.h"
 #import "UIApplication+JTSImageViewController.h"
 
+#import "SDWebImageManager.h"
+
 CG_INLINE CGFLOAT_TYPE JTSImageFloatAbs(CGFLOAT_TYPE aFloat) {
 #if CGFLOAT_IS_DOUBLE
     return fabs(aFloat);
@@ -388,6 +390,42 @@ typedef struct {
 - (void)setupImageAndDownloadIfNecessary:(JTSImageInfo *)imageInfo {
     if (imageInfo.image) {
         self.image = imageInfo.image;
+    }
+    else if (imageInfo.isCachedImage) {
+
+        self.image = imageInfo.placeholderImage;
+
+        BOOL fromDisk = [imageInfo.imageURL.absoluteString hasPrefix:@"file://"];
+        _flags.imageIsBeingReadFromDisk = fromDisk;
+
+        typeof(self) __weak weakSelf = self;
+        
+        [[SDWebImageManager sharedManager] downloadImageWithURL:imageInfo.imageURL options:SDWebImageRetryFailed progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+            typeof(self) strongSelf = weakSelf;
+            CGFloat progress = 0;
+            if (expectedSize > 0 && fromDisk == NO) {
+                [UIView animateWithDuration:0.25 delay:0 options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveLinear animations:^{
+                    strongSelf.spinner.alpha = 0;
+                    strongSelf.progressView.alpha = 1;
+                } completion:nil];
+                progress = (CGFloat)receivedSize / (CGFloat)expectedSize;
+            }
+            strongSelf.progressView.progress = progress;
+        } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+            typeof(self) strongSelf = weakSelf;
+            if (image) {
+                if (strongSelf.isViewLoaded) {
+                    [strongSelf updateInterfaceWithImage:image];
+                } else {
+                    strongSelf.image = image;
+                }
+            } else if (strongSelf.image == nil) {
+                _flags.imageDownloadFailed = YES;
+                if (_flags.isPresented && _flags.isAnimatingAPresentationOrDismissal == NO) {
+                    [strongSelf dismiss:YES];
+                }
+            }
+        }];
     }
     else {
         
