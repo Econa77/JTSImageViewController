@@ -15,6 +15,7 @@
 ///--------------------------------------------------------------------------------------------------------------------
 
 @protocol JTSImageViewControllerDismissalDelegate;
+@protocol JTSImageViewControllerImageDownloadDelegate;
 @protocol JTSImageViewControllerOptionsDelegate;
 @protocol JTSImageViewControllerInteractionsDelegate;
 @protocol JTSImageViewControllerAccessibilityDelegate;
@@ -54,6 +55,8 @@ extern CGFloat const JTSImageViewController_DefaultBackgroundBlurRadius;
 @property (assign, nonatomic, readonly) JTSImageViewControllerBackgroundOptions backgroundOptions;
 
 @property (weak, nonatomic, readwrite) id <JTSImageViewControllerDismissalDelegate> dismissalDelegate;
+
+@property (weak, nonatomic, readwrite) id <JTSImageViewControllerImageDownloadDelegate> imageDownloadDelegate;
 
 @property (weak, nonatomic, readwrite) id <JTSImageViewControllerOptionsDelegate> optionsDelegate;
 
@@ -107,6 +110,25 @@ extern CGFloat const JTSImageViewController_DefaultBackgroundBlurRadius;
 - (void)imageViewerDidDismiss:(JTSImageViewController *)imageViewer;
 
 @end
+
+///--------------------------------------------------------------------------------------------------------------------
+/// Image Download Delegate
+///--------------------------------------------------------------------------------------------------------------------
+@protocol JTSImageViewControllerImageDownloadDelegate <NSObject>
+@optional
+
+/**
+ Called failed download image
+ */
+- (void)imageViewerDidFailImageDownload:(JTSImageViewController *)imageViewer;
+
+/**
+ Called succeed download image
+ */
+- (void)imageViewerDidSuccessImageDownload:(JTSImageViewController *)imageViewer;
+
+@end
+
 
 ///--------------------------------------------------------------------------------------------------------------------
 /// Options Delegate

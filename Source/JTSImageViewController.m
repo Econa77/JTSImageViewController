@@ -414,12 +414,14 @@ typedef struct {
         } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
             typeof(self) strongSelf = weakSelf;
             if (image) {
+                [strongSelf.imageDownloadDelegate imageViewerDidSuccessImageDownload:strongSelf];
                 if (strongSelf.isViewLoaded) {
                     [strongSelf updateInterfaceWithImage:image];
                 } else {
                     strongSelf.image = image;
                 }
             } else if (strongSelf.image == nil) {
+                [strongSelf.imageDownloadDelegate imageViewerDidFailImageDownload:strongSelf];
                 _flags.imageDownloadFailed = YES;
                 if (_flags.isPresented && _flags.isAnimatingAPresentationOrDismissal == NO) {
                     [strongSelf dismiss:YES];
@@ -439,12 +441,14 @@ typedef struct {
             typeof(self) strongSelf = weakSelf;
             [strongSelf cancelProgressTimer];
             if (image) {
+                [strongSelf.imageDownloadDelegate imageViewerDidSuccessImageDownload:strongSelf];
                 if (strongSelf.isViewLoaded) {
                     [strongSelf updateInterfaceWithImage:image];
                 } else {
                     strongSelf.image = image;
                 }
             } else if (strongSelf.image == nil) {
+                [strongSelf.imageDownloadDelegate imageViewerDidFailImageDownload:strongSelf];
                 _flags.imageDownloadFailed = YES;
                 if (_flags.isPresented && _flags.isAnimatingAPresentationOrDismissal == NO) {
                     [strongSelf dismiss:YES];
