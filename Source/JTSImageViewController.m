@@ -173,9 +173,33 @@ typedef struct {
     if (_flags.isPresented == NO) {
         return;
     }
-    
     _flags.isPresented = NO;
-    
+
+    if (animated == NO) {
+        self.view.userInteractionEnabled = NO;
+        _flags.isAnimatingAPresentationOrDismissal = YES ;
+        _flags.isDismissing = YES;
+
+        __weak JTSImageViewController *weakSelf = self;
+
+        if ([weakSelf.animationDelegate respondsToSelector:@selector(imageViewerWillBeginDismissal:withContainerView:)]) {
+            [weakSelf.animationDelegate imageViewerWillBeginDismissal:weakSelf withContainerView:weakSelf.view];
+        }
+
+        if ([UIApplication sharedApplication].jts_usesViewControllerBasedStatusBarAppearance) {
+            [weakSelf setNeedsStatusBarAppearanceUpdate];
+        } else {
+            [[UIApplication sharedApplication] setStatusBarHidden:_startingInfo.statusBarHiddenPriorToPresentation
+                                                    withAnimation:UIStatusBarAnimationFade];
+        }
+
+        [weakSelf.presentingViewController dismissViewControllerAnimated:NO completion:^{
+            [weakSelf.dismissalDelegate imageViewerDidDismiss:weakSelf];
+        }];
+
+        return;
+    }
+
     if (self.mode == JTSImageViewControllerMode_AltText) {
         [self dismissByExpandingAltTextToOffscreenPosition];
     }
